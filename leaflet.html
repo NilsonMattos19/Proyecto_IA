@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+</head>
+<body>
+    <div id="map" style="width: 100%; height: 500px;"></div>
+    <button id="confirm-location">Confirmar Ubicación</button>
+    <script>
+        var map = L.map('map').setView([51.505, -0.09], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19
+        }).addTo(map);
+
+        var marker;
+
+        map.on('click', function(e) {
+            if (marker) {
+                map.removeLayer(marker);
+            }
+            marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+            marker.bindPopup("Coordenadas: " + e.latlng.lat + ", " + e.latlng.lng).openPopup();
+        });
+
+        document.getElementById('confirm-location').onclick = function() {
+            if (marker) {
+                const lat = marker.getLatLng().lat;
+                const lng = marker.getLatLng().lng;
+
+                fetch(`https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lng}&key=tu_api_key`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.results && data.results.length > 0) {
+                            const direccion = data.results[0].formatted;
+                            if (window.opener && typeof window.opener.recibirDatosMapa === 'function') {
+                                window.opener.recibirDatosMapa(direccion, lat, lng);
+                            } else {
+                                alert("Error: No se encontró la función `recibirDatosMapa` en la ventana principal.");
+                            }
+                            window.close(); // Cierra la ventana del mapa
+                        } else {
+                            alert("No se encontró ninguna dirección para las coordenadas proporcionadas.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al obtener la dirección:', error);
+                        alert("Hubo un error al intentar obtener la dirección.");
+                    });
+            } else {
+                alert("Por favor, haga clic en el mapa para seleccionar una ubicación.");
+            }
+        };
+    </script>
+</body>
+</html>

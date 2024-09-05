@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <style>
+        /* Asegúrate de que el mapa ocupe toda la ventana */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+        // Coordenadas para Cartagena de Indias, Colombia
+        var map = L.map('map').setView([10.3910, -75.4794], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19
+        }).addTo(map);
+
+        var marker;
+
+        function onMapClick(e) {
+            if (marker) {
+                map.removeLayer(marker);
+            }
+
+            marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+
+            var geocoder = L.Control.Geocoder.nominatim();
+            geocoder.reverse(e.latlng, map.options.crs.scale(map.getZoom()), function(results) {
+                if (results.length > 0) {
+                    var result = results[0];
+                    var direccion = result.name;
+                    var confirmacion = confirm("Confirmar dirección: " + direccion);
+
+                    if (confirmacion) {
+                        // Intentar copiar la dirección al portapapeles
+                        navigator.clipboard.writeText(direccion).then(function() {
+                            alert("Dirección copiada al portapapeles. Pégala en el formulario.");
+                            // Cerrar la ventana después de mostrar el mensaje
+                            window.close();
+                        }).catch(function(err) {
+                            alert("No se pudo copiar la dirección: " + err);
+                        });
+                    } else {
+                        map.removeLayer(marker);
+                    }
+                } else {
+                    alert("No se encontró ninguna dirección para las coordenadas proporcionadas.");
+                }
+            });
+        }
+
+        map.on('click', onMapClick);
+    </script>
+</body>
+</html>

@@ -22,12 +22,6 @@ def crear_modelo():
 def entrenar_modelo():
     modelo = crear_modelo()
     
-    # Aquí cargarías tus datos de entrenamiento y etiquetas
-    # datos_entrenamiento, etiquetas = cargar_datos()
-    
-    # Ejemplo de entrenamiento
-    # modelo.fit(datos_entrenamiento, etiquetas, epochs=5)
-    
     modelo.save('models/modelo_entrenado.h5')
     print("Modelo entrenado y guardado.")
 

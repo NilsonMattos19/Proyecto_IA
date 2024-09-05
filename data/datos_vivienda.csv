@@ -1,3 +1,7 @@
 Direccion,Ano Construccion,Numero Pisos,Tamano Lote,Numero Habitaciones,Numero Banos,Superficie Construida,Tipo Construccion,Estado,Garaje,Piscina,Jardin
 "Tr. 79G #54 - 77, Ucopin, Cartagena de Indias, Provincia de Cartagena, Bolívar",2021,14,50,2,1,25,Edificio,Renovado,True,True,False
 "Tr. 79G #54 - 77, Ucopin, Cartagena de Indias, Provincia de Cartagena, Bolívar",2021,14,25,2,1,25,Edificio,Renovado,True,True,False
+Las Palmeras,2021,14,22,2,1,10,Edificio,Renovado,True,True,False,10.399520303651371,-75.4698944091797
+,,,,,,,,,False,False,False,100000,413389999.99999994
+,2020,5,100,2,1,15,Apartamentos,Nueva,True,False,False,100000,413389999.99999994
+,2020,5,100,2,1,15,Apartamentos,Nueva,True,False,False,100000,413389999.99999994
