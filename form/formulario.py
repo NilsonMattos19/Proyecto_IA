@@ -7,6 +7,19 @@ import requests
 from PIL import Image, ImageTk
 import json
 
+# Conversión de peso colombiano a dólares
+COP_TO_USD = 0.00024
+
+# Diccionario con multiplicadores por estrato
+estrato_multiplicadores = {
+    1: 0.7,
+    2: 0.8,
+    3: 0.9,
+    4: 1.0,
+    5: 1.2,
+    6: 1.5
+}
+
 def obtener_precio_en_moneda_local(precio_usd, codigo_pais):
     api_key = "99cf1eb7c34ff70da08a45a2"
     url = f"https://api.exchangerate-api.com/v4/latest/USD"
@@ -18,6 +31,18 @@ def obtener_precio_en_moneda_local(precio_usd, codigo_pais):
         return precio_usd * tasa_cambio
     else:
         return precio_usd
+
+def ajustar_precio_por_estrato(precio_base_cop, estrato):
+    if estrato not in estrato_multiplicadores:
+        raise ValueError("Estrato no válido. Debe estar entre 1 y 6.")
+    
+    # Ajustar precio según estrato
+    precio_ajustado = precio_base_cop * estrato_multiplicadores[estrato]
+    
+    # Convertir a dólares
+    precio_en_dolares = precio_ajustado * COP_TO_USD
+    
+    return precio_ajustado, precio_en_dolares
 
 def guardar_datos():
     direccion = entrada_direccion.get()
@@ -33,8 +58,12 @@ def guardar_datos():
     piscina = var_piscina.get()
     jardin = var_jardin.get()
 
-    # Obtener el precio calculado por la IA en USD (ejemplo fijo aquí)
-    precio_usd = 100000  # Ejemplo de precio, reemplázalo con el valor real
+    # Estrato de la vivienda (esto ahora viene del formulario)
+    estrato = int(entrada_estrato.get())  # Se añade este campo al formulario
+    precio_base_cop = 200_000_000  # Precio base en COP (ejemplo)
+    
+    # Ajustar precio por estrato y convertir a USD
+    precio_ajustado_cop, precio_usd = ajustar_precio_por_estrato(precio_base_cop, estrato)
 
     # Obtener el código del país (debe ser determinado por la dirección o coordenadas)
     codigo_pais = "COP"  # Ejemplo para Colombia
@@ -46,10 +75,10 @@ def guardar_datos():
     with open(archivo_csv, mode='a', newline='') as archivo:
         escritor = csv.writer(archivo)
         if not archivo_existe:
-            escritor.writerow(["Direccion", "Ano Construccion", "Numero Pisos", "Tamano Lote", "Numero Habitaciones", "Numero Banos", "Superficie Construida", "Tipo Construccion", "Estado", "Garaje", "Piscina", "Jardin", "Precio USD", "Precio Local"])
-        escritor.writerow([direccion, ano_construccion, num_pisos, tam_lote, num_habitaciones, num_banos, superficie, tipo_construccion, estado, garaje, piscina, jardin, precio_usd, precio_local])
+            escritor.writerow(["Direccion", "Ano Construccion", "Numero Pisos", "Tamano Lote", "Numero Habitaciones", "Numero Banos", "Superficie Construida", "Tipo Construccion", "Estado", "Garaje", "Piscina", "Jardin", "Precio USD", "Precio Local", "Estrato"])
+        escritor.writerow([direccion, ano_construccion, num_pisos, tam_lote, num_habitaciones, num_banos, superficie, tipo_construccion, estado, garaje, piscina, jardin, precio_usd, precio_local, estrato])
     
-    messagebox.showinfo("Información", f"Datos guardados exitosamente!\nPrecio en USD: {precio_usd}\nPrecio en moneda local: {precio_local}")
+    messagebox.showinfo("Información", f"Datos guardados exitosamente!\nPrecio en COP ajustado: {precio_ajustado_cop}\nPrecio en USD: {precio_usd}\nPrecio en moneda local: {precio_local}")
 
 def capturar_ubicacion():
     ruta_mapa = 'C:/Users/USUARIO/OneDrive/Escritorio/Proyecto_IA/mapa.html'
@@ -101,6 +130,7 @@ def crear_formulario():
         "Superficie Construida (m²):",
         "Tipo de Construcción:",
         "Estado General:",
+        "Estrato:"
     ]
     
     entradas = {}
@@ -111,7 +141,7 @@ def crear_formulario():
         entrada.grid(row=i, column=1, padx=10, pady=5)
         entradas[texto] = entrada
     
-    global entrada_direccion, entrada_ano, entrada_pisos, entrada_lote, entrada_habitaciones, entrada_banos, entrada_superficie, entrada_tipo, entrada_estado
+    global entrada_direccion, entrada_ano, entrada_pisos, entrada_lote, entrada_habitaciones, entrada_banos, entrada_superficie, entrada_tipo, entrada_estado, entrada_estrato
     entrada_direccion = entradas["Dirección:"]
     entrada_ano = entradas["Año de Construcción:"]
     entrada_pisos = entradas["Número de Pisos:"]
@@ -121,6 +151,7 @@ def crear_formulario():
     entrada_superficie = entradas["Superficie Construida (m²):"]
     entrada_tipo = entradas["Tipo de Construcción:"]
     entrada_estado = entradas["Estado General:"]
+    entrada_estrato = entradas["Estrato:"]  # Nueva entrada para el estrato
     
     global var_garaje, var_piscina, var_jardin
     var_garaje = tk.BooleanVar()
